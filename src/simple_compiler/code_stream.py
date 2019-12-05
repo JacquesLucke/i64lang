@@ -1,9 +1,6 @@
 from typing import Optional, Callable
 
 class CodeStream:
-    code: str
-    position: int
-
     def __init__(self, code: str):
         self.code = code
         self.position = 0
