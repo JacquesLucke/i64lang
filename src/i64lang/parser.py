@@ -87,6 +87,58 @@ def parse__statement__assignment(tokens: TokenStream) -> ast.AssignmentStmt:
     tokens.skip_symbol(";")
     return ast.AssignmentStmt(name, expr)
 
+def parse__expression(tokens: TokenStream) -> ast.Expression:
+    return parse__expression__comparison_level(tokens)
+
+def parse__expression__comparison_level(tokens: TokenStream) -> ast.Expression:
+    left_expr = parse__expression__add_sub_level(tokens)
+    if tokens.next_is_any_symbol_of({"==", "<=", ">=", "!=", "<", ">"}):
+        operator = tokens.consume_symbol()
+        right_expr = parse__expression__add_sub_level(tokens)
+        return ast.InfixExpr(operator, left_expr, right_expr)
+    else:
+        return left_expr
+
+def parse__expression__add_sub_level(tokens: TokenStream) -> ast.Expression:
+    left_expr = parse__expression__mul_div_level(tokens)
+    while tokens.next_is_any_symbol_of({"+", "-"}):
+        operator = tokens.consume_symbol()
+        right_expr = parse__expression__mul_div_level(tokens)
+        left_expr = ast.InfixExpr(operator, left_expr, right_expr)
+    return left_expr
+
+def parse__expression__mul_div_level(tokens: TokenStream) -> ast.Expression:
+    left_expr = parse__expression__call_level(tokens)
+    while tokens.next_is_any_symbol_of({"*", "/"}):
+        operator = tokens.consume_symbol()
+        right_expr = parse__expression__call_level(tokens)
+        left_expr = ast.InfixExpr(operator, left_expr, right_expr)
+    return left_expr
+
+def parse__expression__call_level(tokens: TokenStream) -> ast.Expression:
+    ptr_expr = parse__expression__atom_level(tokens)
+    if tokens.next_is_symbol("("):
+        args = parse__call_arguments(tokens)
+        return ast.Call(ptr_expr, args)
+    else:
+        return expr
+
+def parse__call_arguments(tokens: TokenStream) -> List[Expression]:
+    return parse__list(tokens, parse__expression__comparison_level, "(", ")", ",")
+
+def parse__expression__atom_level(tokens: TokenStream) -> ast.Expression:
+    if tokens.next_is_any_name():
+        name = tokens.consume_name()
+        return ast.Variable(name)
+    elif tokens.next_is_int():
+        value = tokens.consume_int()
+        return ast.Int(name)
+    elif tokens.next_is_symbol("("):
+        tokens.skip_symbol("(")
+        expr = parse__expression(tokens)
+        tokens.skip_symbol(")")
+        return expr
+
 def parse__list(tokens: TokenStream,
                parse_element: Callable[[TokenStream], Any],
                start_symbol: str,

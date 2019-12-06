@@ -47,30 +47,20 @@ class Expression:
     pass
 
 @dataclass
-class ComparisonExpr(Expression):
+class InfixExpr(Expression):
     operator: str
     left_expr: Expression
     right_expr: Expression
-
-@dataclass
-class AddSubExpr(Expression):
-    add_expr: List[Expression]
-    sub_expr: List[Expression]
-
-@dataclass
-class MulDivExpr(Expression):
-    mul_expr: List[Expression]
-    sub_expr: List[Expression]
 
 @dataclass
 class Variable(Expression):
     name: str
 
 @dataclass
-class ConstInt(Expression):
+class Int(Expression):
     value: int
 
 @dataclass
-class FunctionCall(Expression):
-    name: str
+class Call(Expression):
+    ptr_expr: Expression
     args: List[Expression]

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Set
 
 from . tokens import (
     NameToken,
@@ -12,25 +12,38 @@ class TokenStream:
         self.tokens = tokens
         self.position = 0
 
-    def next_is_any_name(self) -> bool:
+    def try_peek_next_token(self) -> Optional[Token]:
         if self.position < len(self.tokens):
-            next_token = self.tokens[self.position]
-            return isinstance(next_token, NameToken)
-        return False
+            return self.tokens[self.position]
+        return None
+
+    def try_peek_next_token_of_type(self, TokenCls) -> Optional[Token]:
+        if token := self.try_peek_next_token():
+            if isinstance(token, TokenCls):
+                return token
+        return None
+
+    def next_is_any_name(self) -> bool:
+        return self.try_peek_next_token_of_type(NameToken) is not None
 
     def next_is_name(self, name: str) -> bool:
-        if self.position < len(self.tokens):
-            next_token = self.tokens[self.position]
-            if isinstance(next_token, NameToken):
-                return next_token.name == name
+        if token := self.try_peek_next_token_of_type(NameToken):
+            return token.name == name
         return False
 
+    def next_is_any_symbol(self) -> bool:
+        return self.try_peek_next_token_of_type(SymbolToken) is not None
+
     def next_is_symbol(self, symbol: str) -> bool:
-        if self.position < len(self.tokens):
-            next_token = self.tokens[self.position]
-            if isinstance(next_token, SymbolToken):
-                return next_token.symbol == symbol
+        return self.next_is_any_symbol_of({symbol})
+
+    def next_is_any_symbol_of(self, symbols: Set[str]) -> bool:
+        if token := self.try_peek_next_token_of_type(SymbolToken):
+            return token.symbol in symbols
         return False
+
+    def next_is_int(self) -> bool:
+        return self.try_peek_next_token_of_type(IntToken) is not None
 
     def skip_name(self, name: str):
         if self.next_is_name(name):
@@ -45,9 +58,22 @@ class TokenStream:
             raise RuntimeError(f"expected {name}")
 
     def consume_name(self):
-        if self.next_is_any_name():
-            token = self.tokens[self.position]
+        if token := self.try_peek_next_token_of_type(NameToken):
             self.position += 1
             return token.name
         else:
             raise RuntimeError("expected name")
+
+    def consume_symbol(self):
+        if token := self.try_peek_next_token_of_type(SymbolToken):
+            self.position += 1
+            return token.symbol
+        else:
+            raise RuntimeError("expected symbol")
+
+    def consume_int(self):
+        if token := self.try_peek_next_token_of_type(IntToken):
+            self.position += 1
+            return token.value
+        else:
+            raise RuntimeError("expected int")
