@@ -32,32 +32,22 @@ class TokenStream:
                 return next_token.symbol == symbol
         return False
 
-    def consume_expected_name(self, name: str):
-        assert self.next_is_name(name)
-        self.position += 1
+    def skip_name(self, name: str):
+        if self.next_is_name(name):
+            self.position += 1
+        else:
+            raise RuntimeError(f"expected {name}")
 
-    def consume_expected_symbol(self, symbol: str):
-        assert self.next_is_symbol(symbol)
-        self.position += 1
+    def skip_symbol(self, symbol: str):
+        if self.next_is_symbol(symbol):
+            self.position += 1
+        else:
+            raise RuntimeError(f"expected {name}")
 
-    def consume_name_or_raise(self):
-        if self.position >= len(self.tokens):
-            raise RuntimeError("unexpected end of tokens")
-
-        token = self.tokens[self.position]
-        if not isinstance(token, NameToken):
-            raise RuntimeError(f"expected a name token but got {token}")
-
-        self.position += 1
-
-        return token.name
-
-    def consume_expected_symbol_or_raise(self, symbol: str):
-        self.position >= len(self.tokens):
-            raise RuntimeError("unexpected end of tokens")
-
-        token = self.tokens[self.position]
-        if not isinstance(token, SymbolToken) or token.symbol != symbol:
-            raise RuntimeError(f"expected a {symbol} symbol but got {token}")
-
-        self.position += 1
+    def consume_name(self):
+        if self.next_is_any_name():
+            token = self.tokens[self.position]
+            self.position += 1
+            return token.name
+        else:
+            raise RuntimeError("expected name")
