@@ -14,9 +14,9 @@ class CodeStream:
     def consume_next(self) -> str:
         assert self.position < len(self.code)
 
-        chars = self.code[self.position]
+        char = self.code[self.position]
         self.position += 1
-        return chars
+        return char
 
     def consume_while(self, predicate: Callable[[str], bool]):
         consumed_chars = ""
