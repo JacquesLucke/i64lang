@@ -29,7 +29,7 @@ def parse__function(tokens: TokenStream) -> ast.Function:
     tokens.skip_name("def")
     name = tokens.consume_name()
     arg_names = parse__argument_names(tokens)
-    stmt = parse__statement(tokens)
+    stmt = parse__statement__block(tokens)
     return ast.Function(name, arg_names, stmt)
 
 def parse__argument_names(tokens: TokenStream) -> List[str]:
@@ -145,6 +145,8 @@ def parse__expression__atom_level(tokens: TokenStream) -> ast.Expression:
         left_expr = ast.Int(0)
         right_expr = parse__expression__call_level(tokens)
         return ast.InfixExpr("-", left_expr, right_expr)
+    else:
+        raise RuntimeError("invalid atom")
 
 def parse__list(tokens: TokenStream,
                parse_element: Callable[[TokenStream], Any],

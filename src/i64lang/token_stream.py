@@ -25,9 +25,6 @@ class TokenStream:
             return token.name == name
         return False
 
-    def next_is_any_symbol(self) -> bool:
-        return self.try_peek_next_token_of_type(SymbolToken) is not None
-
     def next_is_symbol(self, symbol: str) -> bool:
         return self.next_is_any_symbol_of({symbol})
 
