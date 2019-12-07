@@ -55,3 +55,31 @@ def test_MovMemToReg():
     test([x64.rax, x64.rbp], "488b4500", "mov rax, [rbp]")
     test([x64.rbx, x64.r13], "498b5d00", "mov rbx, [r13]")
     test([x64.rdx, x64.r12], "498b1424", "mov rdx, [r12]")
+
+def test_AddRegToReg():
+    test = get_instruction_tester(x64.AddRegToReg)
+
+    test([x64.rax, x64.rax], "4801c0", "add rax, rax")
+    test([x64.rdx, x64.rsp], "4801e2", "add rdx, rsp")
+    test([x64.r13, x64.r15], "4d01fd", "add r13, r15")
+    test([x64.r8, x64.r10], "4d01d0", "add r8, r10")
+    test([x64.rbx, x64.r13], "4c01eb", "add rbx, r13")
+    test([x64.rdi, x64.r14], "4c01f7", "add rdi, r14")
+    test([x64.r9, x64.rbp], "4901e9", "add r9, rbp")
+    test([x64.r11, x64.rsp], "4901e3", "add r11, rsp")
+
+def test_SubRegFromReg():
+    test = get_instruction_tester(x64.SubRegFromReg)
+
+    test([x64.rax, x64.rbx], "4829d8", "sub rax, rbx")
+    test([x64.r12, x64.r14], "4d29f4", "sub r12, r14")
+    test([x64.rsp, x64.r9], "4c29cc", "sub rsp, r9")
+    test([x64.r8, x64.rdx], "4929d0", "sub r8, rdx")
+
+def test_Compare():
+    test = get_instruction_tester(x64.Compare)
+
+    test([x64.rax, x64.rbx], "4839d8", "cmp rax, rbx")
+    test([x64.r12, x64.r14], "4d39f4", "cmp r12, r14")
+    test([x64.rsp, x64.r9], "4c39cc", "cmp rsp, r9")
+    test([x64.r8, x64.rdx], "4939d0", "cmp r8, rdx")

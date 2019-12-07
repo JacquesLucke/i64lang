@@ -100,6 +100,35 @@ class MovMemToReg(Instruction):
 
         return prefix + opcode + args + imm
 
+@dataclass
+class SimpleTwoRegisterInstruction(Instruction):
+    opcode_hex = NotImplemented
+    intel_syntax_name = NotImplemented
+
+    dst_reg: Register
+    src_reg: Register
+
+    def to_machine_code(self):
+        prefix = get_register_group_prefix(self.dst_reg, self.src_reg)
+        opcode = Bits.from_hex(self.opcode_hex)
+        args = Bits("11") + self.src_reg.bits + self.dst_reg.bits
+        return prefix + opcode + args
+
+    def to_intel(self):
+        return f"{self.intel_syntax_name} {self.dst_reg.name}, {self.src_reg.name}"
+
+class AddRegToReg(SimpleTwoRegisterInstruction):
+    opcode_hex = "01"
+    intel_syntax_name = "add"
+
+class SubRegFromReg(SimpleTwoRegisterInstruction):
+    opcode_hex = "29"
+    intel_syntax_name = "sub"
+
+class Compare(SimpleTwoRegisterInstruction):
+    opcode_hex = "39"
+    intel_syntax_name = "cmp"
+
 
 def get_register_group_prefix(reg1: Register, reg2: Register) -> Bits:
     return prefixes_for_64_bit_registers[(reg1.group, reg2.group)]
