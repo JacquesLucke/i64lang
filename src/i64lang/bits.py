@@ -81,7 +81,7 @@ class Bits:
         return Bits(self.bit_string[index_or_slice])
 
     def __repr__(self):
-        text = self.to_hex() if len(self) % 4 == 0 else self.to_bin()
+        text = "0x" + self.to_hex() if len(self) % 4 == 0 else self.to_bin()
         return f"<Bits: {text}>"
 
     def __int__(self):
