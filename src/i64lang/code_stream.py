@@ -11,6 +11,17 @@ class CodeStream:
         else:
             return None
 
+    def next_is(self, text: str):
+        if self.position + len(text) <= len(self.code):
+            actual_code = self.code[self.position:self.position + len(text)]
+            return text == actual_code
+        else:
+            return False
+
+    def skip_n(self, n: int):
+        self.position += n
+        assert self.position <= len(self.code)
+
     def consume_next(self) -> str:
         assert self.position < len(self.code)
 

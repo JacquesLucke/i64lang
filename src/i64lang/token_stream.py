@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 from . tokens import (
     NameToken,
@@ -55,7 +55,7 @@ class TokenStream:
         if self.next_is_symbol(symbol):
             self.position += 1
         else:
-            raise RuntimeError(f"expected {name}")
+            raise RuntimeError(f"expected {symbol}")
 
     def consume_name(self):
         if token := self.try_peek_next_token_of_type(NameToken):

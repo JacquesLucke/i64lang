@@ -3,7 +3,7 @@ from . code_stream import CodeStream
 from . lexer import (
     tokenize,
     tokenize_str,
-    tokenize_single_char_symbol,
+    try_tokenize_symbol,
     tokenize_int,
     tokenize_name,
 )
@@ -49,13 +49,29 @@ class Test_tokenize:
         assert tokens[3].symbol == "-"
         assert tokens[4].symbol == "/"
 
-class Test_tokenize_single_char_symbol:
-    def test__consumes_next_char(self):
-        code = CodeStream("abc")
-        token = tokenize_single_char_symbol(code)
-        assert isinstance(token, SymbolToken)
-        assert token.symbol == "a"
-        assert code.try_peek_next() == "b"
+class Test_try_tokenize_symbol:
+    def test__finds_single_char(self):
+        code = CodeStream("<")
+        token = try_tokenize_symbol(code)
+        assert token.symbol == "<"
+
+    def test__advances_position(self):
+        code = CodeStream("<a")
+        token = try_tokenize_symbol(code)
+        assert token.symbol == "<"
+        assert code.try_peek_next() == "a"
+
+    def test__finds_two_character_symbol(self):
+        code = CodeStream("==a")
+        token = try_tokenize_symbol(code)
+        assert token.symbol == "=="
+
+    def test__finds_two_and_one_character_symbol(self):
+        code = CodeStream("===")
+        token1 = try_tokenize_symbol(code)
+        token2 = try_tokenize_symbol(code)
+        assert token1.symbol == "=="
+        assert token2.symbol == "="
 
 class Test_tokenize_int:
     def test__single_digit(self):

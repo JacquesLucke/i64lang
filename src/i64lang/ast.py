@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 from dataclasses import dataclass
 
@@ -53,7 +55,7 @@ class InfixExpr(Expression):
     right_expr: Expression
 
 @dataclass
-class Variable(Expression):
+class Identifier(Expression):
     name: str
 
 @dataclass
