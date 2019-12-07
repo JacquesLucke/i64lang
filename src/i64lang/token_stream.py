@@ -1,11 +1,5 @@
 from typing import List, Optional, Set
-
-from . tokens import (
-    NameToken,
-    IntToken,
-    SymbolToken,
-    Token
-)
+from . tokens import NameToken, IntToken, SymbolToken, Token
 
 class TokenStream:
     def __init__(self, tokens: List[Token]):

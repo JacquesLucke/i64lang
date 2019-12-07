@@ -1,21 +1,14 @@
 __all__ = [
-    "tokenize"
+    "tokenize",
+    "tokenize_str",
 ]
 
-from typing import Union, List, Set, Optional
 from collections import defaultdict
+from typing import Union, List, Set, Optional
 from string import digits, ascii_letters, whitespace
+
 from . code_stream import CodeStream
-
-from . tokens import (
-    NameToken,
-    IntToken,
-    SymbolToken,
-    Token
-)
-
-identifier_begins = set(ascii_letters + "_")
-identifier_continuations = set(digits + ascii_letters + "_")
+from . tokens import NameToken, IntToken, SymbolToken, Token
 
 def tokenize_str(code: str) -> List[Token]:
     return tokenize(CodeStream(code))
@@ -37,14 +30,6 @@ def iter_tokens(code: CodeStream):
         else:
             raise ValueError(f"unknown symbol: {repr(next_char)}")
 
-possible_symbols = list("{}()+-*/=;<>,") + ["==", "!=", "<=", ">="]
-symbols_by_first_char = defaultdict(list)
-for symbol in possible_symbols:
-    symbols_by_first_char[symbol[0]].append(symbol)
-
-sorted_symbols_by_first_char = {first_char : tuple(sorted(symbols, key=len, reverse=True))
-                                for first_char, symbols in symbols_by_first_char.items()}
-
 def try_tokenize_symbol(code: CodeStream) -> Optional[SymbolToken]:
     first_char = code.try_peek_next()
     for symbol in sorted_symbols_by_first_char.get(first_char, ()):
@@ -61,3 +46,14 @@ def tokenize_int(code: CodeStream) -> IntToken:
 def tokenize_name(code: CodeStream) -> NameToken:
     identifier = code.consume_while(lambda c: c in identifier_continuations)
     return NameToken(identifier)
+
+identifier_begins = set(ascii_letters + "_")
+identifier_continuations = set(digits + ascii_letters + "_")
+
+possible_symbols = list("{}()+-*/=;<>,") + ["==", "!=", "<=", ">="]
+symbols_by_first_char = defaultdict(list)
+for symbol in possible_symbols:
+    symbols_by_first_char[symbol[0]].append(symbol)
+
+sorted_symbols_by_first_char = {first_char : tuple(sorted(symbols, key=len, reverse=True))
+                                for first_char, symbols in symbols_by_first_char.items()}
