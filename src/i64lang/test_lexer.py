@@ -1,3 +1,5 @@
+import pytest
+
 from . code_stream import CodeStream
 
 from . lexer import (
@@ -48,6 +50,10 @@ class Test_tokenize:
         assert tokens[2].symbol == ")"
         assert tokens[3].symbol == "-"
         assert tokens[4].symbol == "/"
+
+    def test__invalid_tokens(self):
+        with pytest.raises(Exception):
+            tokenize_str(":")
 
 class Test_try_tokenize_symbol:
     def test__finds_single_char(self):

@@ -4,4 +4,4 @@ from i64lang.ast_to_graph import ast_to_graph
 
 a = parse_str("def hello(qwe, das) {a=-5;}")
 graph = ast_to_graph(a)
-graph.render()
+# graph.render()
