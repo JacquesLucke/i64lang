@@ -22,7 +22,7 @@ class Register:
         self.bits = Bits.from_int(self.number, length=3)
 
 class Instruction:
-    def to_intel(self) -> str:
+    def to_intel_syntax(self) -> str:
         raise NotImplementedError()
 
     def to_machine_code(self) -> str:
@@ -33,7 +33,7 @@ class MovImmToReg(Instruction):
     reg: Register
     value: int
 
-    def to_intel(self):
+    def to_intel_syntax(self):
         return f"mov {self.reg.name}, {self.value}"
 
     def to_machine_code(self):
@@ -55,7 +55,7 @@ class MovRegToMem(Instruction):
     addr_reg: Register
     src_reg: Register
 
-    def to_intel(self):
+    def to_intel_syntax(self):
         return f"mov [{self.addr_reg.name}], {self.src_reg.name}"
 
     def to_machine_code(self):
@@ -80,7 +80,7 @@ class MovMemToReg(Instruction):
     dst_reg: Register
     addr_reg: Register
 
-    def to_intel(self):
+    def to_intel_syntax(self):
         return f"mov {self.dst_reg.name}, [{self.addr_reg.name}]"
 
     def to_machine_code(self):
@@ -114,7 +114,7 @@ class SimpleTwoRegisterInstruction(Instruction):
         args = Bits("11") + self.src_reg.bits + self.dst_reg.bits
         return prefix + opcode + args
 
-    def to_intel(self):
+    def to_intel_syntax(self):
         return f"{self.intel_syntax_name} {self.dst_reg.name}, {self.src_reg.name}"
 
 class AddRegToReg(SimpleTwoRegisterInstruction):
@@ -129,6 +129,50 @@ class Compare(SimpleTwoRegisterInstruction):
     opcode_hex = "39"
     intel_syntax_name = "cmp"
 
+@dataclass
+class SetOnConditionInstruction(Instruction):
+    opcode_hex = NotImplemented
+    intel_syntax_name = NotImplemented
+
+    reg: Register
+
+    def to_machine_code(self):
+        zeroing = MovImmToReg(self.reg, 0).to_machine_code()
+
+        prefix = Bits.from_hex("41" if self.reg.group == 1 else "")
+        opcode = Bits.from_hex(self.opcode_hex)
+        args = Bits("11000") + self.reg.bits
+        set_byte_on_condition = prefix + opcode + args
+
+        return zeroing + set_byte_on_condition
+
+    def to_intel_syntax(self):
+        # This is a combination of two instructions.
+        return f"{self.intel_syntax_name} {self.reg.name}"
+
+class SetIfNotEqual(SetOnConditionInstruction):
+    opcode_hex = "0f95"
+    intel_syntax_name = "setne"
+
+class SetIfEqual(SetOnConditionInstruction):
+    opcode_hex = "0f94"
+    intel_syntax_name = "sete"
+
+class SetIfGreater(SetOnConditionInstruction):
+    opcode_hex = "0f9f"
+    intel_syntax_name = "setg"
+
+class SetIfLess(SetOnConditionInstruction):
+    opcode_hex = "0f9c"
+    intel_syntax_name = "setl"
+
+class SetIfGreaterOrEqual(SetOnConditionInstruction):
+    opcode_hex = "0f9d"
+    intel_syntax_name = "setge"
+
+class SetIfLessOrEqual(SetOnConditionInstruction):
+    opcode_hex = "0f9e"
+    intel_syntax_name = "setle"
 
 def get_register_group_prefix(reg1: Register, reg2: Register) -> Bits:
     return prefixes_for_64_bit_registers[(reg1.group, reg2.group)]

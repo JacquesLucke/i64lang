@@ -11,7 +11,7 @@ def get_instruction_tester(instruction_cls):
     def tester(params, machine_code, intel_syntax):
         instruction: x64.Instruction = instruction_cls(*params)
         assert instruction.to_machine_code() == Bits.from_hex(machine_code)
-        assert instruction.to_intel() == intel_syntax
+        assert instruction.to_intel_syntax() == intel_syntax
     return tester
 
 
@@ -83,3 +83,14 @@ def test_Compare():
     test([x64.r12, x64.r14], "4d39f4", "cmp r12, r14")
     test([x64.rsp, x64.r9], "4c39cc", "cmp rsp, r9")
     test([x64.r8, x64.rdx], "4939d0", "cmp r8, rdx")
+
+def test_SetIfNotEqual():
+    test = get_instruction_tester(x64.SetIfNotEqual)
+
+    test([x64.rax], "48C7C0000000000F95C0", "setne rax")
+    test([x64.rbx], "48C7C3000000000F95C3", "setne rbx")
+    test([x64.rcx], "48C7C1000000000F95C1", "setne rcx")
+    test([x64.rdx], "48C7C2000000000F95C2", "setne rdx")
+
+    test([x64.r10], "49C7C200000000410F95C2", "setne r10")
+    test([x64.r12], "49C7C400000000410F95C4", "setne r12")
