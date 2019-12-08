@@ -174,6 +174,13 @@ class SetIfLessOrEqual(SetOnConditionInstruction):
     opcode_hex = "0f9e"
     intel_syntax_name = "setle"
 
+class Return(Instruction):
+    def to_machine_code(self):
+        return Bits.from_hex("c3")
+
+    def to_intel_syntax(self):
+        return "ret"
+
 def get_register_group_prefix(reg1: Register, reg2: Register) -> Bits:
     return prefixes_for_64_bit_registers[(reg1.group, reg2.group)]
 
